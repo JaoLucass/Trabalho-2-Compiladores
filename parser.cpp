@@ -23,7 +23,7 @@ void Parser::Block()
         cout << "{ ";    
 
 
-    // nova tabela de símbolos para o bloco
+    // nova tabela de sï¿½mbolos para o bloco
     // ------------------------------------
     SymTable * saved = symtable;
     symtable = new SymTable(symtable);
@@ -61,12 +61,12 @@ void Parser::Decls()
 
         Symbol s { name, type };
         
-        // insere variável na tabela de símbolos
+        // insere variï¿½vel na tabela de sï¿½mbolos
         if(!symtable->Insert(name, s))
         {
-            // a inserção falha quando a variável já está na tabela
+            // a inserï¿½ï¿½o falha quando a variï¿½vel jï¿½ estï¿½ na tabela
             stringstream ss;
-            ss << "variável \"" << name << "\" já definida";
+            ss << "variï¿½vel \"" << name << "\" jï¿½ definida";
             throw SyntaxError(scanner.Lineno(), ss.str());    
         }
 
@@ -113,24 +113,28 @@ void Parser::Stmts()
 
 void Parser::Fact()
 {
-    // fact -> id
+    // fact -> id | num
     if (lookahead->tag == Tag::ID)
-    {      
-        // verifica tipo da variável na tabela de símbolos
+    {
         Symbol * s = symtable->Find(lookahead->toString());
-        if (!s)
-        {
+        if (!s) {
             stringstream ss;
-            ss << "variável \"" << lookahead->toString() << "\" não declarada";
+            ss << "variÃ¡vel \"" << lookahead->toString() << "\" nÃ£o declarada";
             throw SyntaxError{ scanner.Lineno(), ss.str() };
         }
         cout << s->var << ':' << s->type << "; ";
         Match(Tag::ID);
     }
+    else if (lookahead->tag == Tag::NUM || lookahead->tag == Tag::NUM_FLOAT)
+    {
+        cout << lookahead->toString() << ": "
+             << (lookahead->tag == Tag::NUM_FLOAT ? "float" : "int") << "; ";
+        Match(lookahead->tag);
+    }
     else
     {
         stringstream ss;
-        ss << '\'' << lookahead->toString() << "\' inválido na expressão";  
+        ss << '\'' << lookahead->toString() << "\' invÃ¡lido na expressÃ£o";  
         throw SyntaxError{ scanner.Lineno(), ss.str() };
     }
 }

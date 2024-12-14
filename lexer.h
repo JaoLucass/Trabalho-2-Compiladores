@@ -5,9 +5,9 @@ using std::stringstream;
 using std::unordered_map;
 using std::string;
 
-// cada token possui uma tag (número a partir de 256)
-// a tag de caracteres individuais é seu código ASCII
-enum Tag { TYPE = 256, NUM, ID };
+// cada token possui uma tag (nï¿½mero a partir de 256)
+// a tag de caracteres individuais ï¿½ seu cï¿½digo ASCII
+enum Tag { TYPE = 256, NUM, NUM_FLOAT, ID };
 
 // classes para representar tokens
 struct Token
@@ -20,10 +20,20 @@ struct Token
 
 struct Num : public Token
 {
-	int value;
-	Num(): Token(Tag::NUM), value(0) {}
-	Num(int v) : Token(Tag::NUM), value(v) {}
-	virtual string toString() { stringstream ss; ss << value; return ss.str(); }
+    double value;
+    bool is_float;
+
+    Num() : Token(Tag::NUM), value(0), is_float(false) {}
+    Num(double v, int tag = Tag::NUM) : Token(tag), value(v), is_float(tag == Tag::NUM_FLOAT) {}
+
+    virtual string toString() {
+        stringstream ss;
+        if (is_float)
+            ss << value;
+        else
+            ss << static_cast<int>(value);
+        return ss.str();
+    }
 };
 
 struct Id : public Token
@@ -34,7 +44,7 @@ struct Id : public Token
 	virtual string toString() { return name; }
 };
 
-// analisador léxico
+// analisador lï¿½xico
 class Lexer
 {
 private:

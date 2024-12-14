@@ -9,6 +9,7 @@ extern std::ifstream fin;
 Lexer::Lexer()
 {
 	// insere palavras-reservadas na tabela de id's
+	id_table["float"] = Id{ Tag::TYPE, "float" };
 	id_table["int"] = Id{ Tag::TYPE, "int" };
 	id_table["char"] = Id{ Tag::TYPE, "char" };
 	id_table["bool"] = Id{ Tag::TYPE, "bool" };
@@ -17,16 +18,16 @@ Lexer::Lexer()
 	peek = fin.get();
 }
 
-// retorna número da linha atual
+// retorna nï¿½mero da linha atual
 int Lexer::Lineno()
 {
 	return line;
 }
 
-// retorna tokens para o analisador sintático
+// retorna tokens para o analisador sintï¿½tico
 Token * Lexer::Scan()
 {
-	// ignora espaços em branco, tabulações e novas linhas
+	// ignora espaï¿½os em branco, tabulaï¿½ï¿½es e novas linhas
 	while (isspace(peek))
 	{
 		if (peek == '\n')
@@ -34,19 +35,42 @@ Token * Lexer::Scan()
 		peek = fin.get();
 	}
 
-	// retorna números
+	// retorna nï¿½meros
 	if (isdigit(peek))
 	{
 		int v = 0;
+		bool is_float = false;
+    	double float_value = 0.0;
+    	double divisor = 10.0;
 
 		do
 		{
-			// converte caractere 'n' para o dígito numérico n
+			// converte caractere 'n' para o dï¿½gito numï¿½rico n
 			int n = peek - '0';
 			v = 10 * v + n;
 			peek = fin.get();
 		}
  		while (isdigit(peek));
+
+		// Detectar ponto decimal
+		if (peek == '.') {
+			is_float = true;
+			peek = fin.get();
+
+			while (isdigit(peek)) {
+				int n = peek - '0';
+				float_value += n / divisor;
+				divisor *= 10.0;
+				peek = fin.get();
+			}
+		}
+
+		if (is_float) {
+        token.n = Num{ v + float_value, Tag::NUM_FLOAT };
+		} else {
+			token.n = Num{ v };
+		}
+		return &token.n;
 
 		// retorna o token NUM
 		token.n = Num{v};
@@ -67,7 +91,7 @@ Token * Lexer::Scan()
 		string s = ss.str();
 		auto pos = id_table.find(s);
 
-		// se o lexema já está na tabela
+		// se o lexema jï¿½ estï¿½ na tabela
 		if (pos != id_table.end())
 		{
 			// retorna o token associado
@@ -75,7 +99,7 @@ Token * Lexer::Scan()
 			return &token.i;
 		}
 
-		// se o lexema ainda não está na tabela
+		// se o lexema ainda nï¿½o estï¿½ na tabela
 		Id new_id {Tag::ID, s};
 		id_table[s] = new_id;
 
@@ -84,7 +108,7 @@ Token * Lexer::Scan()
 		return &token.i;
 	}
 
-	// operadores (e caracteres não alphanuméricos isolados)
+	// operadores (e caracteres nï¿½o alphanumï¿½ricos isolados)
 	Token op {peek};
 	peek = ' ';
 
